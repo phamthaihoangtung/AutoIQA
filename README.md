@@ -26,15 +26,49 @@ A comprehensive Python application for automated image quality assessment with n
 
 ## Installation
 
-1. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Option 1: Conda Environment (Recommended)
 
-2. **Verify Installation**:
-   ```bash
-   python demo.py
-   ```
+**Quick Setup:**
+```bash
+# Automated setup
+python setup_conda.py
+
+# Or manual setup
+conda env create -f environment.yml
+conda activate image-quality-assessment
+```
+
+**Using setup script:**
+```bash
+# Make executable and run
+chmod +x setup.sh
+./setup.sh
+```
+
+**Using Makefile:**
+```bash
+make install    # Install with conda
+make verify     # Verify installation
+make demo       # Run demonstration
+```
+
+### Option 2: Pip Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+### Verification
+
+```bash
+# Verify all packages
+python setup_conda.py --verify
+
+# Or run demo
+python demo.py
+```
+
+**📋 See [INSTALL.md](INSTALL.md) for detailed installation instructions.**
 
 ## Usage
 
