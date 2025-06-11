@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Quality Assessment Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #e9ecef;
+        }
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .quality-badge {
+            font-size: 1.1em;
+            padding: 8px 16px;
+        }
+        .metric-card {
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .report-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .loading {
+            display: none;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center mb-5">
+                    <h1 class="display-4"><i class="fas fa-image"></i> Image Quality Assessment</h1>
+                    <p class="lead">Upload an image to get automated quality analysis with detailed explanations</p>
+                </div>
+                
+                <!-- Upload Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <h4>Drop your image here or click to browse</h4>
+                            <p class="text-muted">Supports: PNG, JPG, JPEG, GIF, BMP, TIFF, WebP (Max: 16MB)</p>
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <p class="text-center mt-2">Analyzing image quality...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="resultsSection" style="display: none;">
+                    <!-- Overall Score -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Overall Quality Assessment</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <div id="overallScore"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Metrics -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cogs"></i> Detailed Analysis</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="metricsContainer">
+                                <!-- Metrics will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Natural Language Report -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-file-alt"></i> Detailed Report</h3>
+                        </div>
+                        <div class="card-body">
+                            <pre id="reportText" class="report-section"></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul id="recommendationsList" class="list-group list-group-flush">
+                                <!-- Recommendations will be populated here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Section -->
+                <div id="errorSection" class="alert alert-danger" style="display: none;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.querySelector('.progress-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorSection = document.getElementById('errorSection');
+
+        // Upload area click handler
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showError('Please select a valid image file (PNG, JPG, JPEG, GIF, BMP, TIFF, WebP)');
+                return;
+            }
+
+            // Validate file size (16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size must be less than 16MB');
+                return;
+            }
+
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Show progress
+            progressContainer.style.display = 'block';
+            resultsSection.style.display = 'none';
+            errorSection.style.display = 'none';
+
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    
+                    if (data.success) {
+                        displayResults(data.results, data.report);
+                    } else {
+                        showError(data.error || 'An error occurred while processing the image');
+                    }
+                }, 500);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                progressContainer.style.display = 'none';
+                showError('Network error: ' + error.message);
+            });
+        }
+
+        function displayResults(results, report) {
+            // Display overall score
+            const overall = results.overall;
+            const scoreColor = getQualityColor(overall.quality);
+            document.getElementById('overallScore').innerHTML = `
+                <h2><span class="badge quality-badge" style="background-color: ${scoreColor}">${overall.quality}</span></h2>
+                <h3>${overall.score}%</h3>
+                <p class="lead">${overall.summary}</p>
+            `;
+
+            // Display metrics
+            const metricsContainer = document.getElementById('metricsContainer');
+            metricsContainer.innerHTML = '';
+
+            const metrics = ['sharpness', 'brightness', 'contrast', 'noise', 'color_balance', 'saturation'];
+            metrics.forEach(metric => {
+                if (results[metric]) {
+                    const data = results[metric];
+                    const color = getQualityColor(data.quality);
+                    const icon = getMetricIcon(metric);
+                    
+                    metricsContainer.innerHTML += `
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card metric-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="${icon} fa-2x mb-2" style="color: ${color}"></i>
+                                    <h5>${metric.replace('_', ' ').toUpperCase()}</h5>
+                                    <span class="badge" style="background-color: ${color}">${data.quality}</span>
+                                    <p class="mt-2 small">${data.description}</p>
+                                    <small class="text-muted">${data.metric}: ${data.score}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Display resolution info
+            if (results.resolution) {
+                const res = results.resolution;
+                metricsContainer.innerHTML += `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card metric-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-expand-arrows-alt fa-2x mb-2 text-info"></i>
+                                <h5>RESOLUTION</h5>
+                                <span class="badge bg-info">${res.resolution_quality}</span>
+                                <p class="mt-2 small">${res.description}</p>
+                                <small class="text-muted">Resolution: ${res.resolution}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Display report
+            document.getElementById('reportText').textContent = report;
+
+            // Generate and display recommendations
+            const recommendations = generateRecommendations(results);
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+            recommendations.forEach(rec => {
+                recommendationsList.innerHTML += `
+                    <li class="list-group-item">
+                        <i class="fas fa-arrow-right text-primary me-2"></i>${rec}
+                    </li>
+                `;
+            });
+
+            resultsSection.style.display = 'block';
+        }
+
+        function generateRecommendations(results) {
+            const recommendations = [];
+            
+            if (results.sharpness && ['Poor', 'Fair'].includes(results.sharpness.quality)) {
+                recommendations.push('Consider using a tripod or faster shutter speed to improve sharpness');
+            }
+            
+            if (results.brightness && ['Poor', 'Fair'].includes(results.brightness.quality)) {
+                if (results.brightness.score < 80) {
+                    recommendations.push('Increase exposure or adjust shadows to brighten the image');
+                } else {
+                    recommendations.push('Reduce exposure or adjust highlights to prevent overexposure');
+                }
+            }
+            
+            if (results.contrast && ['Poor', 'Fair'].includes(results.contrast.quality)) {
+                recommendations.push('Enhance contrast using curves or levels adjustment');
+            }
+            
+            if (results.noise && ['Poor', 'Fair'].includes(results.noise.quality)) {
+                recommendations.push('Apply noise reduction or use lower ISO settings when capturing');
+            }
+            
+            if (results.color_balance && ['Poor', 'Fair'].includes(results.color_balance.quality)) {
+                recommendations.push('Adjust white balance or apply color correction');
+            }
+            
+            if (results.saturation && ['Poor', 'Fair'].includes(results.saturation.quality)) {
+                if (results.saturation.score < 60) {
+                    recommendations.push('Increase color saturation for more vibrant appearance');
+                } else {
+                    recommendations.push('Reduce saturation for more natural color appearance');
+                }
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push('Image quality is good - no major improvements needed');
+            }
+            
+            return recommendations;
+        }
+
+        function getQualityColor(quality) {
+            const colors = {
+                'Excellent': '#28a745',
+                'Good': '#17a2b8',
+                'Fair': '#ffc107',
+                'Poor': '#dc3545'
+            };
+            return colors[quality] || '#6c757d';
+        }
+
+        function getMetricIcon(metric) {
+            const icons = {
+                'sharpness': 'fas fa-eye',
+                'brightness': 'fas fa-sun',
+                'contrast': 'fas fa-adjust',
+                'noise': 'fas fa-volume-up',
+                'color_balance': 'fas fa-palette',
+                'saturation': 'fas fa-tint'
+            };
+            return icons[metric] || 'fas fa-chart-bar';
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            errorSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
