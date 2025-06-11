@@ -12,6 +12,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 import os
 import json
+import rawpy
 from typing import Dict, Tuple, List, Any
 
 
@@ -21,21 +22,53 @@ class ImageQualityAssessor:
     def __init__(self):
         self.results = {}
         self.explanations = {}
+        
+        # Supported raw formats
+        self.raw_extensions = {
+            '.arw', '.cr2', '.cr3', '.nef', '.dng', '.raf', '.orf', '.rw2', 
+            '.pef', '.srw', '.x3f', '.3fr', '.fff', '.iiq', '.k25', '.kdc',
+            '.mef', '.mos', '.mrw', '.nrw', '.ptx', '.r3d', '.raw', '.rwl',
+            '.rwz', '.sr2', '.srf', '.srw'
+        }
     
     def load_image(self, image_path: str) -> Tuple[np.ndarray, np.ndarray]:
-        """Load image in both BGR (OpenCV) and RGB formats"""
+        """Load image in both BGR (OpenCV) and RGB formats, supporting raw files"""
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Image not found: {image_path}")
         
-        # Load with OpenCV (BGR)
-        img_bgr = cv2.imread(image_path)
-        if img_bgr is None:
-            raise ValueError(f"Could not load image: {image_path}")
+        # Check if it's a raw file
+        file_ext = os.path.splitext(image_path)[1].lower()
         
-        # Convert to RGB
-        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        if file_ext in self.raw_extensions:
+            # Load raw image using rawpy
+            try:
+                with rawpy.imread(image_path) as raw:
+                    # Process raw to RGB with default settings
+                    img_rgb = raw.postprocess(
+                        use_camera_wb=True,  # Use camera white balance
+                        half_size=False,     # Full resolution
+                        no_auto_bright=True, # Preserve exposure
+                        output_bps=8         # 8-bit output
+                    )
+                
+                # Convert RGB to BGR for OpenCV compatibility
+                img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+                
+                return img_bgr, img_rgb
+                
+            except Exception as e:
+                raise ValueError(f"Could not process raw image {image_path}: {str(e)}")
         
-        return img_bgr, img_rgb
+        else:
+            # Load regular image with OpenCV (BGR)
+            img_bgr = cv2.imread(image_path)
+            if img_bgr is None:
+                raise ValueError(f"Could not load image: {image_path}")
+            
+            # Convert to RGB
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            
+            return img_bgr, img_rgb
     
     def assess_sharpness(self, image: np.ndarray) -> Dict[str, Any]:
         """Assess image sharpness using Laplacian variance"""

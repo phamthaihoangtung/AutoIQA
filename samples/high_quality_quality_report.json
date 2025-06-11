@@ -1,0 +1,57 @@
+{
+  "image_path": "samples/high_quality.jpg",
+  "sharpness": {
+    "score": 261.47,
+    "quality": "Good",
+    "description": "The image has good sharpness with most details clearly visible.",
+    "metric": "Laplacian Variance"
+  },
+  "brightness": {
+    "score": 143.03,
+    "quality": "Excellent",
+    "description": "The image has optimal brightness with good visibility of details.",
+    "metric": "Mean Brightness (0-255)"
+  },
+  "contrast": {
+    "score": 27.02,
+    "quality": "Fair",
+    "description": "The image has moderate contrast but could benefit from enhancement.",
+    "metric": "Standard Deviation"
+  },
+  "noise": {
+    "score": 41.02,
+    "quality": "Poor",
+    "description": "The image has high noise levels that significantly degrade quality.",
+    "metric": "Noise Estimate (lower is better)"
+  },
+  "color_balance": {
+    "score": 44.35,
+    "quality": "Poor",
+    "description": "The image has a strong reddish color cast affecting overall appearance.",
+    "metric": "Max Channel Deviation",
+    "channel_means": {
+      "red": 174.22,
+      "green": 137.85,
+      "blue": 89.52
+    }
+  },
+  "saturation": {
+    "score": 151.02,
+    "quality": "Good",
+    "description": "The image has good color saturation with appealing colors.",
+    "metric": "Mean Saturation (0-255)"
+  },
+  "resolution": {
+    "resolution": "800x600",
+    "total_pixels": 480000,
+    "edge_density": 0.0106,
+    "resolution_quality": "Low Resolution",
+    "detail_quality": "Low Detail",
+    "description": "The image is low resolution (800x600) with limited detail or smooth content."
+  },
+  "overall": {
+    "score": 58.7,
+    "quality": "Fair",
+    "summary": "This image has acceptable quality but would benefit from enhancement."
+  }
+}

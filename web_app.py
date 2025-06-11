@@ -12,11 +12,19 @@ from image_quality_assessor import ImageQualityAssessor
 import tempfile
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 CORS(app)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'webp'}
+ALLOWED_EXTENSIONS = {
+    'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'webp',
+    # Raw formats
+    'arw', 'cr2', 'cr3', 'nef', 'dng', 'raf', 'orf', 'rw2',
+    'pef', 'srw', 'x3f', '3fr', 'fff', 'iiq', 'k25', 'kdc',
+    'mef', 'mos', 'mrw', 'nrw', 'ptx', 'r3d', 'raw', 'rwl',
+    'rwz', 'sr2', 'srf'
+}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -84,4 +92,9 @@ def demo():
     return render_template('demo.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    # Create upload directory if it doesn't exist
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    
+    print("Starting Image Quality Assessment Web Server...")
+    print("Access the application at: http://localhost:12000")
+    app.run(host='0.0.0.0', port=12000, debug=True)

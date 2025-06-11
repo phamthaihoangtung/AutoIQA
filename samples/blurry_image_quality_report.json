@@ -1,0 +1,57 @@
+{
+  "image_path": "samples/blurry_image.jpg",
+  "sharpness": {
+    "score": 49.26,
+    "quality": "Poor",
+    "description": "The image appears blurry or out of focus with poor detail definition.",
+    "metric": "Laplacian Variance"
+  },
+  "brightness": {
+    "score": 143.4,
+    "quality": "Excellent",
+    "description": "The image has optimal brightness with good visibility of details.",
+    "metric": "Mean Brightness (0-255)"
+  },
+  "contrast": {
+    "score": 25.58,
+    "quality": "Fair",
+    "description": "The image has moderate contrast but could benefit from enhancement.",
+    "metric": "Standard Deviation"
+  },
+  "noise": {
+    "score": 53.05,
+    "quality": "Poor",
+    "description": "The image has high noise levels that significantly degrade quality.",
+    "metric": "Noise Estimate (lower is better)"
+  },
+  "color_balance": {
+    "score": 44.32,
+    "quality": "Poor",
+    "description": "The image has a strong reddish color cast affecting overall appearance.",
+    "metric": "Max Channel Deviation",
+    "channel_means": {
+      "red": 174.53,
+      "green": 138.23,
+      "blue": 89.9
+    }
+  },
+  "saturation": {
+    "score": 148.16,
+    "quality": "Excellent",
+    "description": "The image has optimal color saturation with vibrant but natural colors.",
+    "metric": "Mean Saturation (0-255)"
+  },
+  "resolution": {
+    "resolution": "800x600",
+    "total_pixels": 480000,
+    "edge_density": 0.0052,
+    "resolution_quality": "Low Resolution",
+    "detail_quality": "Low Detail",
+    "description": "The image is low resolution (800x600) with limited detail or smooth content."
+  },
+  "overall": {
+    "score": 48.8,
+    "quality": "Poor",
+    "summary": "This image has significant quality issues that should be addressed."
+  }
+}

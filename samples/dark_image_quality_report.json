@@ -1,0 +1,57 @@
+{
+  "image_path": "samples/dark_image.jpg",
+  "sharpness": {
+    "score": 227.85,
+    "quality": "Good",
+    "description": "The image has good sharpness with most details clearly visible.",
+    "metric": "Laplacian Variance"
+  },
+  "brightness": {
+    "score": 43.03,
+    "quality": "Fair",
+    "description": "The image is either slightly too dark or too bright.",
+    "metric": "Mean Brightness (0-255)"
+  },
+  "contrast": {
+    "score": 12.38,
+    "quality": "Poor",
+    "description": "The image has poor contrast appearing flat or washed out.",
+    "metric": "Standard Deviation"
+  },
+  "noise": {
+    "score": 40.42,
+    "quality": "Poor",
+    "description": "The image has high noise levels that significantly degrade quality.",
+    "metric": "Noise Estimate (lower is better)"
+  },
+  "color_balance": {
+    "score": 14.0,
+    "quality": "Good",
+    "description": "The image has good color balance with minor color casts.",
+    "metric": "Max Channel Deviation",
+    "channel_means": {
+      "red": 52.71,
+      "green": 41.81,
+      "blue": 26.26
+    }
+  },
+  "saturation": {
+    "score": 156.64,
+    "quality": "Good",
+    "description": "The image has good color saturation with appealing colors.",
+    "metric": "Mean Saturation (0-255)"
+  },
+  "resolution": {
+    "resolution": "800x600",
+    "total_pixels": 480000,
+    "edge_density": 0.0087,
+    "resolution_quality": "Low Resolution",
+    "detail_quality": "Low Detail",
+    "description": "The image is low resolution (800x600) with limited detail or smooth content."
+  },
+  "overall": {
+    "score": 51.2,
+    "quality": "Poor",
+    "summary": "This image has significant quality issues that should be addressed."
+  }
+}
